@@ -57,20 +57,17 @@ android {
 
     buildTypes {
         debug {
-            debuggable false
+            debuggable false // или true, по вашему усмотрению
             jniDebuggable false
             minifyEnabled false
 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // ЗАМЕНИТЕ ЭТУ СТРОЧКУ:
-            signingConfig signingConfigs.debug 
+            
+            // ЗАКОММЕНТИРУЙТЕ ИЛИ УДАЛИТЕ ЭТУ СТРОКУ:
+            // signingConfig signingConfigs.debug 
         }
         release {
             firebaseCrashlytics {
-                // Enable processing and uploading of native symbols to Firebase servers.
-                // By default, this is disabled to improve build speeds.
-                // This flag must be enabled to see properly-symbolicated native
-                // stack traces in the Crashlytics dashboard.
                 nativeSymbolUploadEnabled true
                 strippedNativeLibsDir 'build/intermediates/stripped_native_libs/release/out/lib'
                 unstrippedNativeLibsDir 'build/intermediates/merged_native_libs/release/out/lib'
@@ -79,12 +76,15 @@ android {
             jniDebuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            
+            // ЕСЛИ СОБИРАЕТЕ РЕЛИЗ БЕЗ КЛЮЧА, ТОЖЕ ЗАКОММЕНТИРУЙТЕ:
+            // signingConfig signingConfigs.release
         }
-        all{
+        all {
             multiDexEnabled true
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
