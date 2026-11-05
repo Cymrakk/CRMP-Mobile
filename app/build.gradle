@@ -62,7 +62,8 @@ android {
             minifyEnabled false
 
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            // ЗАМЕНИТЕ ЭТУ СТРОЧКУ:
+            signingConfig signingConfigs.debug 
         }
         release {
             firebaseCrashlytics {
