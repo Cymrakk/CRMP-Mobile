@@ -5,8 +5,8 @@
     xmlns:aapt="http://schemas.android.com/aapt">
 
     <gradient
-        android:startColor="#008BF6"
-        android:endColor="#1900FD"
+        android:startColor="@color/gradient1"
+        android:endColor="@color/gradient2"
         android:angle="135"
         android:type="linear"/>
 
