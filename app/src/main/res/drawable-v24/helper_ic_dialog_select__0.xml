@@ -8,13 +8,12 @@
     android:endY="17.9998"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt">
-
     <item
-        android:color="#002AFF"
+        android:color="@color/gradient1"
         android:offset="0.0" />
-
     <item
-        android:color="#00002AFF"
+        android:color="@color/gradient2"
+        android:alpha="0.0"
         android:offset="1.0" />
 
 </gradient>
