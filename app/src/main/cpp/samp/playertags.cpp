@@ -119,7 +119,7 @@ void CPlayerTags::Draw(ImGuiRenderer* renderer, CVector* vec, const char* szNick
 	vecOut.x = (float)((int)vecOut.x);
 	vecOut.y = (float)((int)vecOut.y);
 
-	ImColor HealthBarBDRColor = ImColor(0x00, 0x64, 0x95, 0xED);
+	ImColor HealthBarBDRColor = ImColor(230, 230, 230, 255);
 	ImColor HealthBarColor = ImColor(0xB9, 0x22, 0x28, 0xFF);
 	ImColor HealthBarBGColor = ImColor(0x4B, 0x0B, 0x14, 0xFF);
 
@@ -184,13 +184,14 @@ void CPlayerTags::Draw(ImGuiRenderer* renderer, CVector* vec, const char* szNick
 	// Armour Bar
 	if (fArmour > 0.0f)
 	{
-		HealthBarBDR1.y -= offsetY;//13.0f;
-		HealthBarBDR2.y -= offsetY;//13.0f;
-		HealthBarBG1.y -= offsetY;//13.0f;
-		HealthBarBG2.y -= offsetY;//13.0f;
-		HealthBar1.y -= offsetY;//13.0f;
-		HealthBar2.y -= offsetY;//13.0f;
+		HealthBarBDR1.y -= offsetY;
+		HealthBarBDR2.y -= offsetY;
+		HealthBarBG1.y -= offsetY;
+		HealthBarBG2.y -= offsetY;
+		HealthBar1.y -= offsetY;
+		HealthBar2.y -= offsetY;
 
+		HealthBarBDRColor = ImColor(0, 0, 0, 255);   // Черная обводка для брони 
 		HealthBarColor = ImColor(200, 200, 200, 255);
 		HealthBarBGColor = ImColor(40, 40, 40, 255);
 
