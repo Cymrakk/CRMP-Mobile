@@ -498,7 +498,7 @@ void CGame::SetCheckpointInformation(CVector* vecPos, CVector* vecSize)
 			m_vecCheckpointPos.x,
 			m_vecCheckpointPos.y,
 			m_vecCheckpointPos.z,
-			1005, 0);
+			1005, 2);
 	}
 }
 // 0.3.7
@@ -524,7 +524,7 @@ void CGame::SetRaceCheckpointInformation(uint8_t byteType, CVector* vecPos, CVec
 			m_vecRaceCheckpointPos.y,
 			m_vecRaceCheckpointPos.z,
 			1005,
-			0);
+			2);
 	}
 
 	MakeRaceCheckpoint();
