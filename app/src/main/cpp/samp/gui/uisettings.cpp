@@ -20,7 +20,7 @@ float UISettings::m_outlineSize = 2.0f;
 /* ////////////////// pos & size ////////////////// */
 
 /* widgets */
-float UISettings::m_padding = 15.0f;
+float UISettings::m_padding = 7.0f;
 
 /* keyboard */
 ImVec2 UISettings::m_keyboardPos = ImVec2(0.0f, 180.0f/*180.0f*/);
@@ -65,8 +65,15 @@ ImVec2 UISettings::m_buttonVoiceSize = ImVec2(55.0f, 80.0f);
 /* ////////////////// colors ////////////////// */
 
 /* button */
-ImColor UISettings::m_buttonColor = ImColor(0.11f, 0.11f, 0.11f, 0.80f);
-ImColor UISettings::m_buttonFocusedColor = ImColor(0x64, 0x95, 0xED);/*ImColor(119, 4, 4, 255);*/ //ImColor(80, 80, 80);
+/* Находим эти строки в uisettings.cpp и заменяем их значения: */
+
+// 1. Уменьшаем padding, чтобы кнопки стали компактными и угловатыми 
+// 2. Убираем полупрозрачность фона (альфа-канал меняем с 0.80f на 1.00f)
+ImColor UISettings::m_buttonColor = ImColor(0.11f, 0.11f, 0.11f, 1.00f); 
+
+// 3. Вместо василькового ставим стандартный темно-синий цвет зажатой кнопки ImGui
+ImColor UISettings::m_buttonFocusedColor = ImColor(0.11f, 0.29f, 0.60f, 1.00f); 
+
 
 /* keyboard */
 ImColor UISettings::m_keyboardBackgroundColor = ImColor(0, 0, 0, 150);
