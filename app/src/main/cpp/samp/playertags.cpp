@@ -119,18 +119,14 @@ void CPlayerTags::Draw(ImGuiRenderer* renderer, CVector* vec, const char* szNick
 	vecOut.x = (float)((int)vecOut.x);
 	vecOut.y = (float)((int)vecOut.y);
 
-	ImColor HealthBarBDRColor = ImColor(230, 230, 230, 255);
-	ImColor HealthBarColor = ImColor(0xB9, 0x22, 0x28, 0xFF);
-	ImColor HealthBarBGColor = ImColor(0x4B, 0x0B, 0x14, 0xFF);
-
-	//float fWidth = (UISettings::fontSize() / 2) * 3;
-	//float fHeight = (UISettings::fontSize() / 2) * 0.f;
-	//float fOutline = 2.0f;
+	// Перенесенные цвета из первого варианта кода:
+	ImColor HealthBarBDRColor = ImColor(0x00, 0x00, 0x00, 0xFF); // Черная обводка (вместо светло-серой)
+	ImColor HealthBarColor    = ImColor(0xB9, 0x22, 0x28, 0xFF); // Красный / Бордовый
+	ImColor HealthBarBGColor  = ImColor(0x4B, 0x0B, 0x14, 0xFF); // Темно-бордовый фон
 
 	float fWidth = UISettings::nametagBarSize().x;
 	float fHeight = UISettings::nametagBarSize().y;
 	float fOutline = UISettings::outlineSize();
-
 
 	ImVec2 HealthBarBDR1;
 	ImVec2 HealthBarBDR2;
@@ -182,6 +178,7 @@ void CPlayerTags::Draw(ImGuiRenderer* renderer, CVector* vec, const char* szNick
 	ImGui::GetBackgroundDrawList()->AddRectFilled(HealthBar1, HealthBar2, HealthBarColor);
 
 	// Armour Bar
+	// Armour Bar
 	if (fArmour > 0.0f)
 	{
 		HealthBarBDR1.y -= offsetY;
@@ -191,12 +188,14 @@ void CPlayerTags::Draw(ImGuiRenderer* renderer, CVector* vec, const char* szNick
 		HealthBar1.y -= offsetY;
 		HealthBar2.y -= offsetY;
 
-		HealthBarBDRColor = ImColor(0, 0, 0, 255);   // Черная обводка для брони 
-		HealthBarColor = ImColor(200, 200, 200, 255);
-		HealthBarBGColor = ImColor(40, 40, 40, 255);
+		// Строку с изменением HealthBarBDRColor на черный можно удалить или оставить — теперь она совпадает
+		HealthBarBDRColor = ImColor(0, 0, 0, 255);   
+		HealthBarColor = ImColor(200, 200, 200, 255); // Светло-серый
+		HealthBarBGColor = ImColor(40, 40, 40, 255);  // Темно-серый фон
 
 		if (fArmour > 100.0f)
 			fArmour = 100.0f;
+
 
 		fArmour *= fWidth / 100.0f;
 		fArmour -= (fWidth / 2);
