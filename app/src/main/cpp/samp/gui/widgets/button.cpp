@@ -70,13 +70,14 @@ void CButton::draw(ImGuiRenderer* renderer)
 {
 	if (OpenButton == false) return;
 
+	// Рендерим плоский фон кнопки (Focused или обычный)
 	renderer->drawRect(absolutePosition(), absolutePosition() + size(),
 		focused() ? m_colorFocused : m_color, true);
 
-	
+	// Возвращаем старую строгую серую обводку из оригинального ImGui
 	renderer->drawRect(absolutePosition() + ImVec2(UISettings::outlineSize(), UISettings::outlineSize()),
 		(absolutePosition() + size()) - ImVec2(UISettings::outlineSize(), UISettings::outlineSize()),
-		ImColor(0x64, 0x95, 0xED)/*ImColor(0, 0, 0, 200)*/, false, UISettings::outlineSize());
+		ImColor(0.287f, 0.287f, 0.287f, 0.890f), false, UISettings::outlineSize());
 
 	Widget::draw(renderer);
 }
@@ -115,22 +116,21 @@ void OButton::draw(ImGuiRenderer* renderer)
 {
 	if (OpenButton == true)
 	{
-		//Set >> to hide position
 		this->setPosition(ImVec2(-150.0f, -150.0f));
 		return;
 	}
 
+	// Рендерим плоский фон кнопки открытия
 	renderer->drawRect(absolutePosition(), absolutePosition() + size(),
 		focused() ? m_colorFocused : m_color, true);
 
-
+	// Возвращаем серую обводку для кнопки >>
 	renderer->drawRect(absolutePosition() + ImVec2(UISettings::outlineSize(), UISettings::outlineSize()),
 		(absolutePosition() + size()) - ImVec2(UISettings::outlineSize(), UISettings::outlineSize()),
-		ImColor(0x64, 0x95, 0xED)/*ImColor(0, 0, 0, 200)*/, false, UISettings::outlineSize());
+		ImColor(0.287f, 0.287f, 0.287f, 0.890f), false, UISettings::outlineSize());
 
 	Widget::draw(renderer);
 
-	//Set >> to position
 	this->setPosition(ImVec2(15.0f, 15.0f));
 }
 
