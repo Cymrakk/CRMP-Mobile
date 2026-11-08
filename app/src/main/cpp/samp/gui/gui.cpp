@@ -95,7 +95,7 @@ bool UI::initialize()
 	// mem
 	Label* d_label1;
 
-	d_label1 = new Label(cryptor::create("CR:MP Mobile").decrypt(), ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 3);
+	d_label1 = new Label(cryptor::create("").decrypt(), ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 3);
 	this->addChild(d_label1);
 	d_label1->setPosition(ImVec2(3.0, 3.0));
 
@@ -245,7 +245,7 @@ void UI::renderDebug()
         label->setText(&szStr[0]);
         label->setPosition(pos);
 
-        /*auto &msUsed = CStreaming::ms_memoryUsed;
+        auto &msUsed = CStreaming::ms_memoryUsed;
         auto &msAvailable = CStreaming::ms_memoryAvailable;
 
         struct mallinfo memInfo = mallinfo();
@@ -286,7 +286,7 @@ void UI::renderDebug()
         pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(1080.0f - UISettings::fontSize() * 1));
 
         label4->setText(&debugPools[0]);
-        label4->setPosition(pos);*/
+        label4->setPosition(pos);
 }
 
 void UI::PushToBufferedQueueTextDrawPressed(uint16_t textdrawId)
