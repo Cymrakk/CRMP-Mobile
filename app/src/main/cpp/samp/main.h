@@ -42,6 +42,7 @@ void LogVoice(const char* fmt, ...);
 void FLog(const char* fmt, ...);
 void MyLog(const char* fmt, ...);
 void MyLog2(const char* fmt, ...);
+void CRMPLog(const char* fmt, ...);
 void ChatLog(const char* fmt, ...);
 
 template<typename ... Args>

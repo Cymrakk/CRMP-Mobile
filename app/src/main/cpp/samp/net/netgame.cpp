@@ -102,7 +102,8 @@ CNetGame::CNetGame(const char* szHostOrIp, int iPort, const char *szPlayerName, 
     if(pSettings)
         sampVer = pSettings->Get().szVersion;
 
-	if (pUI) pUI->chat()->addDebugMessage("{FFFFFF}Client {FF0000}Black Russia {FFFFFF}Started!");
+	if (pUI) pUI->chat()->addDebugMessage("{FFFFFF}Client started!");
+	CRMPLog("NetGame.cpp - Client started!");
 }
 // 0.3.7
 CNetGame::~CNetGame()
@@ -497,7 +498,7 @@ void CNetGame::ProcessConnecting()
 	{
 		//if (pUI) pUI->chat()->addDebugMessage("Connecting to %s:%d...", m_szHostOrIp, m_iPort);
 		if (pUI) pUI->chat()->addDebugMessage("Connecting to Server...");
-
+		CRMPLog("NetGame.cpp - Connecting to Server...");
 		m_pRakClient->Connect(m_szHostOrIp, m_iPort, 0, 0, 2);
 		
 		// voice fix voice not connect when restart
@@ -536,6 +537,7 @@ void CNetGame::Packet_AuthKey(Packet *pkt)
 void CNetGame::Packet_ConnectAttemptFailed(Packet *pkt)
 {
 	if (pUI) pUI->chat()->addDebugMessage("The server didn't respond. Retrying..");
+	CRMPLog("NetGame.cpp - The server didn't respond. Retrying..");
 	if (pAudioStream) { //add new
 		pAudioStream->Stop(true);
 	}
@@ -550,6 +552,7 @@ void CNetGame::Packet_ConnectAttemptFailed(Packet *pkt)
 void CNetGame::Packet_NoFreeIncomingConnections(Packet *pkt)
 {
 	if(pUI) pUI->chat()->addDebugMessage("The server is full. Retrying...");
+	CRMPLog("NetGame.cpp - The server is full. Retrying...");
 	SpeakerList::Hide(); //addnew
 	MicroIcon::Hide();
 	SetGameState(GAMESTATE_WAIT_CONNECT);
@@ -561,6 +564,7 @@ void CNetGame::Packet_NoFreeIncomingConnections(Packet *pkt)
 void CNetGame::Packet_DisconnectionNotification(Packet *pkt)
 {
 	if (pUI) pUI->chat()->addDebugMessage("Server closed the connection.");
+	CRMPLog("NetGame.cpp - Server closed the connection.");
 	if (pAudioStream) {
 		pAudioStream->Stop(true);
 	}
@@ -587,6 +591,7 @@ void CNetGame::Packet_ConnectionSucceeded(Packet *pkt)
 	uiChallenge ^= iVersion;
 
 	if (pUI) pUI->chat()->addDebugMessage("Connected. Joining the game...");
+	CRMPLog("NetGame.cpp - Connected! Joining the game...");
 
 	SetGameState(GAMESTATE_AWAIT_JOIN);
 

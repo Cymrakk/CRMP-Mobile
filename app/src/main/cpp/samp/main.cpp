@@ -1,6 +1,7 @@
 ﻿#include <jni.h>
 #include <pthread.h>
 #include <syscall.h>
+#include <ctime>
 
 #include "main.h"
 #include "game/game.h"
@@ -451,7 +452,41 @@ void FLog(const char* fmt, ...)
 
 	return;
 }
+void CRMPLog(const char* fmt, ...)
+{
+	char buffer[512];
+	static FILE* myLogFile = nullptr;
+	const char* pszStorage = g_pszStorage;
 
+	if (myLogFile == nullptr && pszStorage != nullptr)
+	{
+		char pathBuffer[256];
+		snprintf(pathBuffer, sizeof(pathBuffer), "%s/crmp_log.txt", pszStorage);
+		myLogFile = fopen(pathBuffer, "a");
+	}
+
+	memset(buffer, 0, sizeof(buffer));
+
+	time_t now = time(nullptr);
+	struct tm* timeinfo = localtime(&now);
+
+	char timeBuffer[32];
+	snprintf(timeBuffer, sizeof(timeBuffer), "[%02d:%02d:%02d] ", 
+		timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+
+	char textBuffer[512];
+	memset(textBuffer, 0, sizeof(textBuffer));
+	
+	va_list arg;
+	va_start(arg, fmt);
+	vsnprintf(textBuffer, sizeof(textBuffer), fmt, arg);
+	va_end(arg);
+
+	snprintf(buffer, sizeof(buffer), "%s%s", timeBuffer, textBuffer); 
+	if (myLogFile == nullptr) return;
+	fprintf(myLogFile, "%s\n", buffer);
+	fflush(myLogFile);
+}
 void ChatLog(const char* fmt, ...)
 {
 	char buffer[0xFF];
