@@ -51,8 +51,8 @@ CSettings::CSettings()
 	m_Settings.fChatPosX = reader.GetReal("gui", "ChatPosX", 325.0f);
 	m_Settings.fChatPosY = reader.GetReal("gui", "ChatPosY", 25.0f);
 	m_Settings.fChatSizeX = reader.GetReal("gui", "ChatSizeX", 1150.0f);
-	m_Settings.fChatSizeY = reader.GetReal("gui", "ChatSizeY", 220.0f);
-	m_Settings.iChatMaxMessages = reader.GetInteger("gui", "ChatMaxMessages", 6);
+	m_Settings.fChatSizeY = reader.GetReal("gui", "ChatSizeY", 293.0f);
+	m_Settings.iChatMaxMessages = reader.GetInteger("gui", "ChatMaxMessages", 8);
 
 	// spawnscreen
 	m_Settings.fSpawnScreenPosX = reader.GetReal("gui", "SpawnScreenPosX", 660.0f);
