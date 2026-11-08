@@ -65,22 +65,23 @@ public:
 	virtual void draw(ImGuiRenderer* renderer);
 	virtual void performLayout();
 
-	/* нажатие на виджет */
+	/* РЅР°Р¶Р°С‚РёРµ РЅР° РІРёРґР¶РµС‚ */
 	virtual void touchPushEvent() {}
-	/* изменение позиции курсора (при условии что он был нажат) */
+	/* РёР·РјРµРЅРµРЅРёРµ РїРѕР·РёС†РёРё РєСѓСЂСЃРѕСЂР° (РїСЂРё СѓСЃР»РѕРІРёРё С‡С‚Рѕ РѕРЅ Р±С‹Р» РЅР°Р¶Р°С‚) */
 	virtual void touchMoveEvent(const ImVec2& delta) {}
-	/* отжатие виджета (при условии что он был нажат) */
+	/* РѕС‚Р¶Р°С‚РёРµ РІРёРґР¶РµС‚Р° (РїСЂРё СѓСЃР»РѕРІРёРё С‡С‚Рѕ РѕРЅ Р±С‹Р» РЅР°Р¶Р°С‚) */
 	virtual void touchPopEvent() {}
 
-	/* виджет становится активным */
+	/* РІРёРґР¶РµС‚ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ Р°РєС‚РёРІРЅС‹Рј */
 	virtual void activateEvent(bool active) {}
-	/* фокус на виджете */
+	/* С„РѕРєСѓСЃ РЅР° РІРёРґР¶РµС‚Рµ */
 	virtual void focuseEvent(bool event) {}
-	/* введен текст */
+	/* РІРІРµРґРµРЅ С‚РµРєСЃС‚ */
 	virtual void keyboardEvent(const std::string& input) {}
 
 protected:
 	virtual ~Widget();
+	std::vector<Widget*> m_children;
 
 private:
 	void updateAbsolutePosition();
@@ -102,6 +103,4 @@ private:
 	bool m_active;
 	ImVec2 m_pushAbsolutePos;
 	ImVec2 m_moveDelta;
-
-	std::vector<Widget*> m_children;
 };
