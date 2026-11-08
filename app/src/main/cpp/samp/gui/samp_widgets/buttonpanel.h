@@ -7,7 +7,7 @@ class ButtonPanel : public Layout
 {
 public:
 	ButtonPanel();
-
+	CButton* m_bH;
 	// Метод покадровой сборки панели без лишних кнопок
 	virtual void draw(ImGuiRenderer* renderer) override;
 
@@ -15,7 +15,6 @@ private:
 	OButton* m_bOpen;
 	CButton* m_bClose;
 	CButton* m_bAlt;
-	CButton* m_bH;
 	CButton* m_bY;
 	CButton* m_bN;
 	CButton* m_bF;
