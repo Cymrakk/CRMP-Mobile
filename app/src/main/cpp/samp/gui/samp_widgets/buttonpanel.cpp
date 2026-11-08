@@ -8,7 +8,7 @@ extern UI* pUI;
 extern CNetGame* pNetGame;
 extern CGame *pGame;
 
-extern bool bNeedEnterVehicle;
+bool bNeedEnterVehicle = false;
 bool OpenButton = false;
 int Tab = 0;
 
