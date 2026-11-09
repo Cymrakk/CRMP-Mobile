@@ -62,6 +62,18 @@ ButtonPanel::ButtonPanel()
 		LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; 
 	});
 	
+	// ПРАВИЛЬНО: Регистрируем всех детей ОДИН раз при создании панели
+	this->addChild(m_bOpen);
+	this->addChild(m_bClose);
+	this->addChild(m_bAlt);
+	this->addChild(m_bG);
+	this->addChild(m_b2);
+	this->addChild(m_bH);
+	this->addChild(m_bF);
+	this->addChild(m_bY);
+	this->addChild(m_bN);
+	this->addChild(m_bTab);
+
 	CRMPLog("ButtonPanel: successfully initialized! All buttons loaded.");
 }
 
@@ -71,18 +83,34 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		return;
 	}
 
-	// 1. Очищаем только вектор указателей m_children (без вызова деструкторов кнопок)
-	m_children.clear();
+	// ПРАВИЛЬНО: Вместо .clear() управляем видимостью (.setVisible)
+	// Сбрасываем видимость контекстных кнопок в false
+	m_bOpen->setVisible(false);
+	m_bClose->setVisible(false);
+	m_bG->setVisible(false);
+	m_b2->setVisible(false);
+	m_bH->setVisible(false);
+	m_bF->setVisible(false);
+	m_bY->setVisible(false);
+	m_bN->setVisible(false);
+	m_bTab->setVisible(false);
 
-	// 2. Добавляем в Layout только те кнопки, которые РЕАЛЬНО должны быть видны прямо сейчас
+	// Кнопка ALT видна всегда
+	m_bAlt->setVisible(true);
+
+	// Проверяем статус спойлера (открыт/закрыт)
 	if (OpenButton) {
-		m_children.push_back(m_bClose);
+		m_bClose->setVisible(true);
+		m_bH->setVisible(true);
+		m_bF->setVisible(true);
+		m_bY->setVisible(true);
+		m_bN->setVisible(true);
+		m_bTab->setVisible(true);
 	} else {
-		m_children.push_back(m_bOpen);
+		m_bOpen->setVisible(true);
 	}
 
-	m_children.push_back(m_bAlt);
-
+	// Проверяем контекст игрока (пешком / в авто / у авто)
 	if (pGame && pGame->FindPlayerPed()) {
 		CPlayerPed* pLocalPed = pGame->FindPlayerPed();
 
@@ -94,33 +122,20 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 				if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
 					CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
 					if (pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
-						m_children.push_back(m_bG); // Кнопка сесть в авто (G)
+						m_bG->setVisible(true); 
 					}
 				}
 			}
 		} 
 		else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-			m_children.push_back(m_b2); // Кнопка действия в авто (2)
+			m_b2->setVisible(true); 
 		}
 	}
 
-	if (OpenButton) {
-		m_children.push_back(m_bH);
-		m_children.push_back(m_bF);
-		m_children.push_back(m_bY);
-		m_children.push_back(m_bN);
-		m_children.push_back(m_bTab);
-	}
+	// Вызываем стандартный просчет позиций родительского класса Layout
+	// Он сам проигнорирует невидимые (setVisible(false)) кнопки и ровно выстроит видимые
+	Layout::performLayout();
 
-	// 3. Устанавливаем родителя только для активных в этом кадре кнопок
-	for (auto child : m_children) {
-		child->setParent(this);
-		child->setVisible(true); // Гарантируем видимость
-	}
-
-	// 4. Запускаем автоматическое выравнивание Layout в ряд только для активных кнопок
-	this->performLayout();
-
-	// 5. Отрисовываем элементы на экране
+	// Отрисовываем элементы
 	Widget::draw(renderer);
 }
