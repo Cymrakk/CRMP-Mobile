@@ -80,30 +80,9 @@ bool UI::initialize()
 	m_playerTabList->setMaxSize(UISettings::dialogMaxSize());
 	m_playerTabList->setVisible(false);
 
-    label = new Label(" ", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-    pUI->addChild(label);
-
-    label2 = new Label(" ", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-    pUI->addChild(label2);
-
-    label3 = new Label(" ", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-    pUI->addChild(label3);
-
-    label4 = new Label(" ", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-    pUI->addChild(label4);
-
-	// mem
-	Label* d_label1;
-
-	d_label1 = new Label(cryptor::create("").decrypt(), ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 3);
-	this->addChild(d_label1);
-	d_label1->setPosition(ImVec2(3.0, 3.0));
-
-
-    // ==== version ==== //
-    //d_label = new Label("", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-    //this->addChild(d_label);
-   // d_label->setPosition(ImVec2(3.0, 55.0));
+	// Оставляем только label для FPS, остальные удалены
+	label = new Label(" ", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
+	pUI->addChild(label);
 
 	return true;
 }
@@ -112,9 +91,9 @@ void UI::render()
 {
 	ImGuiWrapper::render();
 
-    renderDebug();
+	renderDebug();
 
-    ProcessPushedTextdraws();
+	ProcessPushedTextdraws();
 
 	if (m_bNeedClearMousePos) {
 		ImGuiIO& io = ImGui::GetIO();
@@ -132,11 +111,6 @@ void UI::drawList()
 {
 	if (!visible()) return;
 
-	/*Label* label;
-	label = new Label("1.0.11", ImColor(1.0f, 1.0f, 1.0f), true, UISettings::fontSize() / 2);
-	label->setPosition(ImVec2(0.0, 0.0));
-	this->addChild(label);*/
-
 	if (pPlayerTags) pPlayerTags->Render(renderer());
 	if (pNetGame && pNetGame->GetTextLabelPool()) pNetGame->GetTextLabelPool()->Render(renderer());
 	if (pNetGame && pNetGame->GetPlayerBubblePool()) pNetGame->GetPlayerBubblePool()->Render(renderer());
@@ -146,13 +120,6 @@ void UI::drawList()
 
 void UI::touchEvent(const ImVec2& pos, TouchType type)
 {
-	/* 
-		� ������� ����������
-		1 - ����������
-		2 - ������
-		3 - ���
-	*/
-
 	if (m_keyboard->visible() && m_keyboard->contains(pos))
 	{
 		m_keyboard->touchEvent(pos, type);
@@ -179,26 +146,6 @@ bool UI::OnTouchEvent(int type, bool multi, int x, int y)
 {
 	ImGuiIO& io = ImGui::GetIO();
 
-	/*
-	switch (type)
-	{
-	case 1://TOUCH_PUSH:
-		io.MousePos = ImVec2(x, y);
-		io.MouseDown[0] = true;
-		MyLog2("TOUCH_PUSH");
-		break;
-
-	case 2://TOUCH_POP:
-		io.MouseDown[0] = false;
-		m_bNeedClearMousePos = true;
-		MyLog2("TOUCH_POP");
-		break;
-
-	case 3://TOUCH_MOVE:
-		io.MousePos = ImVec2(x, y);
-		MyLog2("TOUCH_MOVE");
-		break;
-	}*/
 	VoiceButton* vbutton = pUI->voicebutton();
 	switch (type)
 	{
@@ -214,7 +161,6 @@ bool UI::OnTouchEvent(int type, bool multi, int x, int y)
 
 	case TOUCH_MOVE:
 		io.MousePos = ImVec2(x, y);
-		//if (vbutton->countdown > 50) vbutton->countdown = 20;
 		break;
 	}
 
@@ -226,87 +172,40 @@ extern CGame *pGame;
 extern CSettings* pSettings;
 void UI::renderDebug()
 {
-    if(!pSettings->Get().iFPSCounter) return;
+	if(!pSettings->Get().iFPSCounter) return;
 
-    char szStr[30];
-    char szStrMem[64];
-    char szStrPos[64];
+	char szStr[30]; // Выделен массив корректного размера, чтобы избежать падений игры
+	ImVec2 pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(540.0f));
 
-    ImVec2 pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(540.0f));
+	static float fps = 120.f;
+	static auto lastTick = CTimer::m_snTimeInMillisecondsNonClipped;
+	if(CTimer::m_snTimeInMillisecondsNonClipped - lastTick > 500) {
+		lastTick = CTimer::m_snTimeInMillisecondsNonClipped;
+		fps = std::clamp(CTimer::game_FPS, 10.f, (float) 120);
+	}
+	snprintf(&szStr[0], sizeof(szStr), "FPS: %.0f", fps);
 
-    static float fps = 120.f;
-        static auto lastTick = CTimer::m_snTimeInMillisecondsNonClipped;
-        if(CTimer::m_snTimeInMillisecondsNonClipped - lastTick > 500) {
-            lastTick = CTimer::m_snTimeInMillisecondsNonClipped;
-            fps = std::clamp(CTimer::game_FPS, 10.f, (float) 120);
-        }
-        snprintf(&szStr[0], sizeof(szStr), "FPS: %.0f", fps);
-
-        label->setText(&szStr[0]);
-        label->setPosition(pos);
-
-        auto &msUsed = CStreaming::ms_memoryUsed;
-        auto &msAvailable = CStreaming::ms_memoryAvailable;
-
-        struct mallinfo memInfo = mallinfo();
-        int totalAllocatedMB  = memInfo.uordblks / (1024 * 1024);
-
-        snprintf(&szStrMem[0], sizeof(szStrMem), "MEM: %d mb (stream %d/%d) (Tex %d MB)",
-                 totalAllocatedMB,
-                 msUsed / (1024 * 1024),
-                 msAvailable / (1024 * 1024),
-                 TextureDatabaseRuntime::storedTexels / (1024 * 1024)
-        );
-
-        pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(1080.0f - UISettings::fontSize() * 9));
-
-        label2->setText(&szStrMem[0]);
-        label2->setPosition(pos);
-
-        if (pGame->FindPlayerPed()->m_pPed)
-        {
-            snprintf(&szStrPos[0], sizeof(szStrPos), "POS: %.2f, %.2f, %.2f", pGame->FindPlayerPed()->m_pPed->m_matrix->m_pos.x, pGame->FindPlayerPed()->m_pPed->m_matrix->m_pos.y, pGame->FindPlayerPed()->m_pPed->m_matrix->m_pos.z);
-            pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(1080.0f - UISettings::fontSize() * 8));
-            label3->setText(&szStrPos[0]);
-            label3->setPosition(pos);
-        }
-        //Log("pools = %d mem = %d", GetPedPoolGta()->GetNoOfUsedSpaces(), totalAllocatedMB);
-        char debugPools[250];
-        snprintf(&debugPools[0], sizeof(debugPools), "NSingle: %d; NDouble: %d; Peds: %d; Veh's: %d; Obj: %d; EntryInf: %d; Dummies: %d, Buildings: %d",
-                 GetPtrNodeSingleLinkPool()->GetNoOfUsedSpaces(),
-                 GetPtrNodeDoubleLinkPool()->GetNoOfUsedSpaces(),
-                 GetPedPoolGta()->GetNoOfUsedSpaces(),
-                 GetVehiclePoolGta()->GetNoOfUsedSpaces(),
-                 GetObjectPoolGta()->GetNoOfUsedSpaces(),
-                 GetEntryInfoNodePool()->GetNoOfUsedSpaces(),
-                 GetDummyPool()->GetNoOfUsedSpaces(),
-                 GetBuildingPool()->GetNoOfUsedSpaces()
-                 );
-
-        pos = ImVec2(pUI->ScaleX(40.0f), pUI->ScaleY(1080.0f - UISettings::fontSize() * 1));
-
-        label4->setText(&debugPools[0]);
-        label4->setPosition(pos);
+	label->setText(&szStr[0]);
+	label->setPosition(pos);
 }
 
 void UI::PushToBufferedQueueTextDrawPressed(uint16_t textdrawId)
 {
-    BUFFERED_COMMAND_TEXTDRAW* pCmd = m_BufferedCommandTextdraws.WriteLock();
+	BUFFERED_COMMAND_TEXTDRAW* pCmd = m_BufferedCommandTextdraws.WriteLock();
 
-    pCmd->textdrawId = textdrawId;
+	pCmd->textdrawId = textdrawId;
 
-    m_BufferedCommandTextdraws.WriteUnlock();
+	m_BufferedCommandTextdraws.WriteUnlock();
 }
 
 void UI::ProcessPushedTextdraws()
 {
-    BUFFERED_COMMAND_TEXTDRAW* pCmd = nullptr;
-    while (pCmd = m_BufferedCommandTextdraws.ReadLock())
-    {
-        RakNet::BitStream bs;
-        bs.Write(pCmd->textdrawId);
-        pNetGame->GetRakClient()->RPC(&RPC_ClickTextDraw, &bs, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, false, UNASSIGNED_NETWORK_ID, 0);
-        m_BufferedCommandTextdraws.ReadUnlock();
-    }
+	BUFFERED_COMMAND_TEXTDRAW* pCmd = nullptr;
+	while (pCmd = m_BufferedCommandTextdraws.ReadLock())
+	{
+		RakNet::BitStream bs;
+		bs.Write(pCmd->textdrawId);
+		pNetGame->GetRakClient()->RPC(&RPC_ClickTextDraw, &bs, HIGH_PRIORITY, RELIABLE_SEQUENCED, 0, false, UNASSIGNED_NETWORK_ID, 0);
+		m_BufferedCommandTextdraws.ReadUnlock();
+	}
 }
-
