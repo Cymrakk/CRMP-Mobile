@@ -61,6 +61,18 @@ ButtonPanel::ButtonPanel()
 	m_b2->setCallback([this]() { 
 		LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; 
 	});
+
+	// ДОБАВЛЯЕМ ВСЕ КНОПКИ В СТРУКТУРУ ОДИН РАЗ ТУТ
+	this->addChild(m_bOpen);
+	this->addChild(m_bClose);
+	this->addChild(m_bAlt);
+	this->addChild(m_bG);
+	this->addChild(m_b2);
+	this->addChild(m_bH);
+	this->addChild(m_bF);
+	this->addChild(m_bY);
+	this->addChild(m_bN);
+	this->addChild(m_bTab);
 	
 	CRMPLog("ButtonPanel: successfully initialized! All buttons loaded.");
 }
@@ -71,14 +83,13 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		return;
 	}
 
-	m_children.clear();
-	if (OpenButton) {
-		m_children.push_back(m_bClose); // Кнопка "<<"
-	} else {
-		m_children.push_back(m_bOpen);  // Кнопка ">>"
-	}
-
-	m_children.push_back(m_bAlt);
+	// Сначала скрываем всё, что должно переключаться динамически
+	m_bOpen->setVisible(!OpenButton);
+	m_bClose->setVisible(OpenButton);
+	m_bAlt->setVisible(true);
+	
+	m_bG->setVisible(false);
+	m_b2->setVisible(false);
 
 	if (pGame && pGame->FindPlayerPed()) {
 		CPlayerPed* pLocalPed = pGame->FindPlayerPed();
@@ -91,27 +102,24 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 				if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
 					CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
 					if (pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
-						m_children.push_back(m_bG);
+						m_bG->setVisible(true);
 					}
 				}
 			}
 		} 
 		else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-			m_children.push_back(m_b2);
+			m_b2->setVisible(true);
 		}
 	}
-	if (OpenButton) {
-		m_children.push_back(m_bH);
-		m_children.push_back(m_bF);
-		m_children.push_back(m_bY);
-		m_children.push_back(m_bN);
-		m_children.push_back(m_bTab);
-	}
-	for (auto child : m_children) {
-		child->setParent(this);
-	}
+
+	// Управление видимостью доп. кнопок при открытой панели
+	m_bH->setVisible(OpenButton);
+	m_bF->setVisible(OpenButton);
+	m_bY->setVisible(OpenButton);
+	m_bN->setVisible(OpenButton);
+	m_bTab->setVisible(OpenButton);
+
+	// Перерасчет позиций только видимых элементов интерфейса
 	this->performLayout();
 	Widget::draw(renderer);
 }
-
-
