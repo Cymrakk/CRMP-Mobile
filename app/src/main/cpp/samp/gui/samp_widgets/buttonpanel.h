@@ -7,19 +7,22 @@ class ButtonPanel : public Layout
 {
 public:
 	ButtonPanel();
-	CButton* m_bH;
-	// Метод покадровой сборки панели без лишних кнопок
 	virtual void draw(ImGuiRenderer* renderer) override;
+
+	CButton* m_bH;
 
 private:
 	OButton* m_bOpen;
 	CButton* m_bClose;
-	CButton* m_bAlt;
-	CButton* m_bY;
-	CButton* m_bN;
+	
+	// В соответствии со старым .h файлом эти кнопки должны быть типа Button*
+	Button* m_bAlt;
+	Button* m_bY;
+	Button* m_bN;
+	
+	// Контекстные кнопки и TAB (кастомные CButton)
 	CButton* m_bF;
 	CButton* m_bG;
 	CButton* m_b2;
-	CButton* m_bTab; // Кнопка TAB осталась и будет выводиться последней
+	CButton* m_bTab;
 };
-
