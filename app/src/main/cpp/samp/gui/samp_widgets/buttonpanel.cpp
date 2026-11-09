@@ -18,10 +18,13 @@ ButtonPanel::ButtonPanel()
 	m_bTab   = new CButton("TAB", UISettings::fontSize() / 2);
 	m_bOpen  = new OButton(">>", UISettings::fontSize() / 2);
 	m_bClose = new CButton("<<", UISettings::fontSize() / 2);
-	m_bAlt   = new CButton("ALT", UISettings::fontSize() / 2);
+	
+	// Выделение памяти в строгом соответствии со старым типами из .h
+	m_bAlt   = new Button("ALT", UISettings::fontSize() / 2);
 	m_bH     = new CButton("H", UISettings::fontSize() / 2);
-	m_bY     = new CButton("Y", UISettings::fontSize() / 2);
-	m_bN     = new CButton("N", UISettings::fontSize() / 2);
+	m_bY     = new Button("Y", UISettings::fontSize() / 2);
+	m_bN     = new Button("N", UISettings::fontSize() / 2);
+	
 	m_bF     = new CButton("F", UISettings::fontSize() / 2);
 	m_bG     = new CButton("G", UISettings::fontSize() / 2);
 	m_b2     = new CButton("2", UISettings::fontSize() / 2);
@@ -38,6 +41,7 @@ ButtonPanel::ButtonPanel()
 			Tab = 0;
 		}
 	});
+
 	m_bAlt->setCallback([this]() {
 		if (pNetGame && pNetGame->GetPlayerPool()) {
 			CPlayerPed* pLocalPed = pGame->FindPlayerPed();
@@ -55,14 +59,9 @@ ButtonPanel::ButtonPanel()
 	m_bN->setCallback([this]() { if(m_bN->visible()) LocalPlayerKeys.bKeys[ePadKeys::KEY_NO] = true; });
 	m_bF->setCallback([this]() { if(m_bF->visible()) LocalPlayerKeys.bKeys[ePadKeys::KEY_SECONDARY_ATTACK] = true; });
 	
-	m_bG->setCallback([this]() { 
-		bNeedEnterVehicle = true; 
-	});
-	m_b2->setCallback([this]() { 
-		LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; 
-	});
+	m_bG->setCallback([this]() { bNeedEnterVehicle = true; });
+	m_b2->setCallback([this]() { LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; });
 	
-	// ПРАВИЛЬНО: Регистрируем всех детей ОДИН раз при создании панели
 	this->addChild(m_bOpen);
 	this->addChild(m_bClose);
 	this->addChild(m_bAlt);
@@ -73,8 +72,6 @@ ButtonPanel::ButtonPanel()
 	this->addChild(m_bY);
 	this->addChild(m_bN);
 	this->addChild(m_bTab);
-
-	CRMPLog("ButtonPanel: successfully initialized! All buttons loaded.");
 }
 
 void ButtonPanel::draw(ImGuiRenderer* renderer)
@@ -83,8 +80,6 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		return;
 	}
 
-	// ПРАВИЛЬНО: Вместо .clear() управляем видимостью (.setVisible)
-	// Сбрасываем видимость контекстных кнопок в false
 	m_bOpen->setVisible(false);
 	m_bClose->setVisible(false);
 	m_bG->setVisible(false);
@@ -95,10 +90,8 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 	m_bN->setVisible(false);
 	m_bTab->setVisible(false);
 
-	// Кнопка ALT видна всегда
 	m_bAlt->setVisible(true);
 
-	// Проверяем статус спойлера (открыт/закрыт)
 	if (OpenButton) {
 		m_bClose->setVisible(true);
 		m_bH->setVisible(true);
@@ -110,7 +103,6 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		m_bOpen->setVisible(true);
 	}
 
-	// Проверяем контекст игрока (пешком / в авто / у авто)
 	if (pGame && pGame->FindPlayerPed()) {
 		CPlayerPed* pLocalPed = pGame->FindPlayerPed();
 
@@ -132,10 +124,5 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		}
 	}
 
-	// Вызываем стандартный просчет позиций родительского класса Layout
-	// Он сам проигнорирует невидимые (setVisible(false)) кнопки и ровно выстроит видимые
-	Layout::performLayout();
-
-	// Отрисовываем элементы
 	Widget::draw(renderer);
 }
