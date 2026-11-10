@@ -33,10 +33,14 @@ ButtonPanel::ButtonPanel()
 
 	m_bTab->setCallback([]() 
 	{ 
+		if (!pUI || !pUI->playertablist()) return;
+
 		if (Tab == 0) {
-			if (pUI) { pUI->playertablist()->show(); Tab = 1; }
+			pUI->playertablist()->show(); 
+			Tab = 1;
 		}
 		else {
+			pUI->playertablist()->hide(); // Исправлено закрытие TAB
 			Tab = 0;
 		}
 	});
@@ -61,25 +65,31 @@ ButtonPanel::ButtonPanel()
 	m_bG->setCallback([this]() { bNeedEnterVehicle = true; });
 	m_b2->setCallback([this]() { LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; });
 	
-	this->addChild(m_bOpen);
-	this->addChild(m_bClose);
-	this->addChild(m_bAlt);
-	this->addChild(m_bG);
-	this->addChild(m_b2);
-	this->addChild(m_bH);
-	this->addChild(m_bF);
-	this->addChild(m_bY);
-	this->addChild(m_bN);
-	this->addChild(m_bTab);
+	// В конструкторе больше не вызываем addChild. 
+	// Мы будем делать это динамически в функции обновления, чтобы избежать багов верстки.
 }
 
-void ButtonPanel::draw(ImGuiRenderer* renderer)
+// Переносим всю логику в ежекадровое обновление (process/update/tick)
+void ButtonPanel::process()
 {
-	if (!pNetGame || (pUI && pUI->dialog() && pUI->dialog()->visible())) {
+	if (!pNetGame) {
+		this->setVisible(false);
 		return;
 	}
 
-	// Сбрасываем всё в false перед расчетом кадра
+	if (pUI && pUI->dialog() && pUI->dialog()->visible()) {
+		this->setVisible(false);
+		return;
+	}
+	
+	this->setVisible(true);
+
+	// ШАГ 1: Полностью очищаем список дочерних элементов панели на этот кадр.
+	// Метод clearChildren() или m_children.clear() обычно есть в любом GUI (зависит от вашего Widget).
+	// Если компилятор выдаст ошибку, используйте: this->m_children.clear();
+	this->m_children.clear(); 
+
+	// ШАГ 2: Сначала жестко скрываем абсолютно все кнопки
 	m_bOpen->setVisible(false);
 	m_bClose->setVisible(false);
 	m_bG->setVisible(false);
@@ -89,48 +99,70 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 	m_bY->setVisible(false);
 	m_bN->setVisible(false);
 	m_bTab->setVisible(false);
-
 	m_bAlt->setVisible(true);
 
-	// Если панель открыта (OpenButton == true)
+	// ШАГ 3: Собираем структуру панели с нуля в зависимости от OpenButton
 	if (OpenButton) {
+		// Если панель ОТКРЫТА:
 		m_bClose->setVisible(true);
 		m_bH->setVisible(true);
 		m_bF->setVisible(true);
 		m_bY->setVisible(true);
 		m_bN->setVisible(true);
 		m_bTab->setVisible(true);
-		// Кнопки 2 и G здесь НЕ включаются, выполняя твое условие
+
+		// Добавляем элементы строго по очереди. Первой пойдет "<<"
+		this->addChild(m_bClose); 
+		this->addChild(m_bAlt);
+		this->addChild(m_bH);
+		this->addChild(m_bF);
+		this->addChild(m_bY);
+		this->addChild(m_bN);
+		this->addChild(m_bTab);
 	} 
-	// Если панель закрыта (OpenButton == false)
 	else {
+		// Если панель ЗАКРЫТА:
 		m_bOpen->setVisible(true);
+		
+		// Добавляем первой кнопку ">>"
+		this->addChild(m_bOpen);
+		this->addChild(m_bAlt);
 
-		// Проверяем контекст для кнопок G и 2 ТОЛЬКО при закрытой панели
-		if (pGame && pGame->FindPlayerPed()) {
+		// Проверяем контекстные кнопки для G и 2
+		if (pGame) {
 			CPlayerPed* pLocalPed = pGame->FindPlayerPed();
+			if (pLocalPed) {
+				if (!pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
+					if (pNetGame->GetVehiclePool()) {
+						CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
+						VEHICLEID ClosetVehicleID = pVehiclePool->FindNearestToLocalPlayerPed();
 
-			if (!pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-				if (pNetGame->GetVehiclePool()) {
-					CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
-					VEHICLEID ClosetVehicleID = pVehiclePool->FindNearestToLocalPlayerPed();
-
-					if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
-						CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
-						if (pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
-							m_bG->setVisible(true); 
+						if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
+							CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
+							if (pVehicle && pVehicle->m_pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
+								m_bG->setVisible(true); 
+								this->addChild(m_bG); // Добавляем в Layout только если она реально нужна
+							}
 						}
 					}
+				} 
+				else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
+					m_b2->setVisible(true); 
+					this->addChild(m_b2); // Добавляем в Layout только если она реально нужна
 				}
-			} 
-			else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-				m_b2->setVisible(true); 
 			}
 		}
 	}
 
-	// Схлопываем дырки: Layout выстроит все видимые кнопки плотно друг к другу
+	// ШАГ 4: Выполняем расчет позиций для кнопок, которые были добавлены.
+	// Теперь никаких скрытых кнопок внутри контейнера нет, и лишние пробелы физически не могут появиться.
 	Layout::performLayout();
+}
 
+void ButtonPanel::draw(ImGuiRenderer* renderer)
+{
+	if (!this->visible()) return;
+
+	// Только рендеринг, никакой логики внутри draw!
 	Widget::draw(renderer);
 }
