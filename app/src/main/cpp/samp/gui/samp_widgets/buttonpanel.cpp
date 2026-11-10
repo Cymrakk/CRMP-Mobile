@@ -19,7 +19,6 @@ ButtonPanel::ButtonPanel()
 	m_bOpen  = new OButton(">>", UISettings::fontSize() / 2);
 	m_bClose = new CButton("<<", UISettings::fontSize() / 2);
 	
-	// Выделение памяти в строгом соответствии со старым типами из .h
 	m_bAlt   = new Button("ALT", UISettings::fontSize() / 2);
 	m_bH     = new CButton("H", UISettings::fontSize() / 2);
 	m_bY     = new Button("Y", UISettings::fontSize() / 2);
@@ -80,6 +79,7 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		return;
 	}
 
+	// Сбрасываем всё в false перед расчетом кадра
 	m_bOpen->setVisible(false);
 	m_bClose->setVisible(false);
 	m_bG->setVisible(false);
@@ -92,6 +92,7 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 
 	m_bAlt->setVisible(true);
 
+	// Если панель открыта (OpenButton == true)
 	if (OpenButton) {
 		m_bClose->setVisible(true);
 		m_bH->setVisible(true);
@@ -99,30 +100,37 @@ void ButtonPanel::draw(ImGuiRenderer* renderer)
 		m_bY->setVisible(true);
 		m_bN->setVisible(true);
 		m_bTab->setVisible(true);
-	} else {
+		// Кнопки 2 и G здесь НЕ включаются, выполняя твое условие
+	} 
+	// Если панель закрыта (OpenButton == false)
+	else {
 		m_bOpen->setVisible(true);
-	}
 
-	if (pGame && pGame->FindPlayerPed()) {
-		CPlayerPed* pLocalPed = pGame->FindPlayerPed();
+		// Проверяем контекст для кнопок G и 2 ТОЛЬКО при закрытой панели
+		if (pGame && pGame->FindPlayerPed()) {
+			CPlayerPed* pLocalPed = pGame->FindPlayerPed();
 
-		if (!pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-			if (pNetGame->GetVehiclePool()) {
-				CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
-				VEHICLEID ClosetVehicleID = pVehiclePool->FindNearestToLocalPlayerPed();
+			if (!pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
+				if (pNetGame->GetVehiclePool()) {
+					CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
+					VEHICLEID ClosetVehicleID = pVehiclePool->FindNearestToLocalPlayerPed();
 
-				if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
-					CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
-					if (pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
-						m_bG->setVisible(true); 
+					if (ClosetVehicleID != INVALID_VEHICLE_ID && pVehiclePool->GetSlotState(ClosetVehicleID)) {
+						CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
+						if (pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
+							m_bG->setVisible(true); 
+						}
 					}
 				}
+			} 
+			else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
+				m_b2->setVisible(true); 
 			}
-		} 
-		else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
-			m_b2->setVisible(true); 
 		}
 	}
+
+	// Схлопываем дырки: Layout выстроит все видимые кнопки плотно друг к другу
+	Layout::performLayout();
 
 	Widget::draw(renderer);
 }
