@@ -40,7 +40,7 @@ ButtonPanel::ButtonPanel()
 			Tab = 1;
 		}
 		else {
-			pUI->playertablist()->hide(); // Исправлено закрытие TAB
+			pUI->playertablist()->hide(); // Исправлен баг незакрывающегося TAB
 			Tab = 0;
 		}
 	});
@@ -64,32 +64,24 @@ ButtonPanel::ButtonPanel()
 	
 	m_bG->setCallback([this]() { bNeedEnterVehicle = true; });
 	m_b2->setCallback([this]() { LocalPlayerKeys.bKeys[ePadKeys::KEY_ACTION] = true; });
-	
-	// В конструкторе больше не вызываем addChild. 
-	// Мы будем делать это динамически в функции обновления, чтобы избежать багов верстки.
+
+	// В конструкторе изначально ничего не добавляем через addChild.
+	// Панель будет собираться «на лету» в draw() в правильном порядке.
 }
 
-// Переносим всю логику в ежекадровое обновление (process/update/tick)
-void ButtonPanel::process()
+void ButtonPanel::draw(ImGuiRenderer* renderer)
 {
-	if (!pNetGame) {
-		this->setVisible(false);
+	// Если нет сети или открыты диалоги — не рисуем панель
+	if (!pNetGame || (pUI && pUI->dialog() && pUI->dialog()->visible())) {
 		return;
 	}
 
-	if (pUI && pUI->dialog() && pUI->dialog()->visible()) {
-		this->setVisible(false);
-		return;
-	}
-	
-	this->setVisible(true);
+	// БЕЗОПАСНАЯ ОЧИСТКА: Просто очищаем вектор указателей. 
+	// Сами объекты кнопок созданы в куче в конструкторе, их адреса хранятся в m_bOpen, m_bAlt и т.д.
+	// Очистка вектора предотвратит дублирование и уберет "невидимые пробелы" скрытых кнопок.
+	this->m_children.clear();
 
-	// ШАГ 1: Полностью очищаем список дочерних элементов панели на этот кадр.
-	// Метод clearChildren() или m_children.clear() обычно есть в любом GUI (зависит от вашего Widget).
-	// Если компилятор выдаст ошибку, используйте: this->m_children.clear();
-	this->m_children.clear(); 
-
-	// ШАГ 2: Сначала жестко скрываем абсолютно все кнопки
+	// Скрываем все кнопки перед формированием списка активных
 	m_bOpen->setVisible(false);
 	m_bClose->setVisible(false);
 	m_bG->setVisible(false);
@@ -101,9 +93,9 @@ void ButtonPanel::process()
 	m_bTab->setVisible(false);
 	m_bAlt->setVisible(true);
 
-	// ШАГ 3: Собираем структуру панели с нуля в зависимости от OpenButton
+	// Строим панель заново в зависимости от состояния OpenButton
 	if (OpenButton) {
-		// Если панель ОТКРЫТА:
+		// Панель ОТКРЫТА
 		m_bClose->setVisible(true);
 		m_bH->setVisible(true);
 		m_bF->setVisible(true);
@@ -111,7 +103,7 @@ void ButtonPanel::process()
 		m_bN->setVisible(true);
 		m_bTab->setVisible(true);
 
-		// Добавляем элементы строго по очереди. Первой пойдет "<<"
+		// Добавляем строго в нужном порядке слева направо. Первой встанет «<<»
 		this->addChild(m_bClose); 
 		this->addChild(m_bAlt);
 		this->addChild(m_bH);
@@ -121,14 +113,14 @@ void ButtonPanel::process()
 		this->addChild(m_bTab);
 	} 
 	else {
-		// Если панель ЗАКРЫТА:
+		// Панель ЗАКРЫТА
 		m_bOpen->setVisible(true);
 		
-		// Добавляем первой кнопку ">>"
+		// Первой встанет кнопка «>>»
 		this->addChild(m_bOpen);
 		this->addChild(m_bAlt);
 
-		// Проверяем контекстные кнопки для G и 2
+		// Логика контекстных кнопок G и 2
 		if (pGame) {
 			CPlayerPed* pLocalPed = pGame->FindPlayerPed();
 			if (pLocalPed) {
@@ -141,28 +133,23 @@ void ButtonPanel::process()
 							CVehicle* pVehicle = pVehiclePool->GetAt(ClosetVehicleID);
 							if (pVehicle && pVehicle->m_pVehicle && pVehicle->m_pVehicle->GetDistanceFromLocalPlayerPed() < 5.0f) {
 								m_bG->setVisible(true); 
-								this->addChild(m_bG); // Добавляем в Layout только если она реально нужна
+								this->addChild(m_bG); // Добавляем в Layout только при наличии машины рядом
 							}
 						}
 					}
 				} 
 				else if (pLocalPed->IsInVehicle() && !pLocalPed->IsAPassenger()) {
 					m_b2->setVisible(true); 
-					this->addChild(m_b2); // Добавляем в Layout только если она реально нужна
+					this->addChild(m_b2); // Добавляем в Layout только если игрок внутри авто
 				}
 			}
 		}
 	}
 
-	// ШАГ 4: Выполняем расчет позиций для кнопок, которые были добавлены.
-	// Теперь никаких скрытых кнопок внутри контейнера нет, и лишние пробелы физически не могут появиться.
+	// Схлопываем пустые места. Так как в m_children лежат только активные кнопки, 
+	// никаких скрытых элементов и лишних пробелов/отступов не останется.
 	Layout::performLayout();
-}
 
-void ButtonPanel::draw(ImGuiRenderer* renderer)
-{
-	if (!this->visible()) return;
-
-	// Только рендеринг, никакой логики внутри draw!
+	// Передаем управление базовому классу для отрисовки сформированного списка кнопок
 	Widget::draw(renderer);
 }
