@@ -52,7 +52,7 @@ void Widget::setWidth(float width)
 void Widget::setHeight(float height)
 {
 	/* min */
-	if (height < m_minSize.y) height = m_minSize.y; // Р‘С‹Р»Рѕ: m_maxSize.y (РѕРїРµС‡Р°С‚РєР°, Р»РѕРјР°РІС€Р°СЏ РІСЃС‘)
+	if (height < m_minSize.y) height = m_maxSize.y;
 	/* max */
 	if (height > m_maxSize.y) height = m_maxSize.y;
 
@@ -64,7 +64,7 @@ void Widget::setPosition(const ImVec2& position)
 	// relative-pos
 	m_position = position;
 
-	// ГЇГҐГ°ГҐГ±Г·ГЁГІГ»ГўГ ГҐГ¬ Г ГЎГ±Г®Г«ГѕГІГ­ГіГѕ ГЇГ®Г§ГЁГ¶ГЁГѕ Г¤Г«Гї this ГЁ child
+	// пересчитываем абсолютную позицию для this и child
 	this->updateAbsolutePosition();
 }
 
@@ -167,7 +167,7 @@ void Widget::touchEvent(const ImVec2& pos, TouchType type)
 		m_moveDelta = { 0.0f, 0.0f };
 	}
 
-	/* ГЇГ°Г®ГµГ®Г¤ГЁГ¬ ГЇГ® Г¤Г®Г·ГҐГ°Г­ГЁГ¬ Г®ГЄГ­Г Г¬ */
+	/* проходим по дочерним окнам */
 	if (m_children.empty()) return;
 	for (auto child : m_children)
 	{
